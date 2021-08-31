@@ -93,6 +93,7 @@ export abstract class HTTPDataSource<TContext = any> extends DataSource {
     super()
     this.memoizedResults = new QuickLRU({
       maxSize: this.options?.lru?.maxSize ? this.options.lru.maxSize : 100,
+      maxAge: this.options?.lru?.maxAge ? this.options.lru.maxAge : 1000 * 60 * 5,
     })
     this.pool = options?.pool ?? new Pool(this.baseURL, options?.clientOptions)
     this.globalRequestOptions = options?.requestOptions
@@ -328,7 +329,7 @@ export abstract class HTTPDataSource<TContext = any> extends DataSource {
 
       return response
     } catch (error) {
-      this.onError?.(error, request)
+      this.onError?.(error as any, request)
 
       // in case of an error we try to respond with a stale result from the stale-if-error cache
       if (request.requestCache) {
@@ -341,7 +342,7 @@ export abstract class HTTPDataSource<TContext = any> extends DataSource {
         }
       }
 
-      throw toApolloError(error)
+      throw toApolloError(error as any)
     }
   }
 
@@ -384,7 +385,7 @@ export abstract class HTTPDataSource<TContext = any> extends DataSource {
           this.memoizedResults.set(cacheKey, response)
           return response
         } catch (error) {
-          this.logger?.error(`Cache item '${cacheKey}' could not be loaded: ${error.message}`)
+          this.logger?.error(`Cache item '${cacheKey}' could not be loaded: ${(error as any).message}`)
         }
       }
 
